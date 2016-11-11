@@ -11,8 +11,8 @@ apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E8
 echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | tee /etc/apt/sources.list.d/docker.list
 apt-get update
 
-apt-get install linux-image-extra-$(uname -r) linux-image-extra-virtual
-apt-get install docker-engine
+apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+apt-get install -y docker-engine
 
 # Start docker and set it to start on boot
 service docker start

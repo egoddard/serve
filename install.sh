@@ -16,9 +16,5 @@ apt-get install -y docker-engine
 
 # Start docker and set it to start on boot
 service docker start
-systemctl enable docker
-
-# Configure the Docker group so that docker commands can be run without root permission
-groupadd docker
 
 useradd -m -G docker serve

@@ -17,4 +17,5 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.provision "shell", privileged: true, path: "install.sh"
+    config.vm.network :forwarded_port, guest: 80, host: 8080
 end

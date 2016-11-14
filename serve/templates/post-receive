@@ -20,3 +20,8 @@ fi
 
 docker build -t {{app}}-image .
 docker run -d -P --name {{app}} {{app}}-image
+
+DPORT=$(echo "`docker port {{app}}`" | pcregrep -o1 '.*\:(\d{5})')
+sed -e 's/#app#/{{app}}/' -e "s/#docker_port#/$DPORT/" /home/serve/serve/serve/templates/nginx_app.conf > /etc/nginx/apps.d/{{app}}.conf
+
+sudo /etc/init.d/nginx reload

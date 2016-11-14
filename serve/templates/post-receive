@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+cd /home/serve/apps
+echo `pwd`
+
+
+if [ -d /home/serve/apps/{{app}} ]; then
+    rm -rf /home/serve/apps/{{app}}
+fi
+
+echo "cloning the {{app}} repository..."
+git clone "{{git_path}}"
+cd /home/serve/apps/{{app}}
+
+if [ -n "`docker ps | grep {{app}}`" ]; then
+    echo "Stopping existing containers..."
+    docker stop {{app}}
+    docker rm {{app}}
+fi
+
+docker build -t {{app}}-image .
+docker run -d -P --name {{app}} {{app}}-image

@@ -1,36 +1,53 @@
 import click
 import os
 import subprocess
+from collections import namedtuple
 from jinja2 import Environment, FileSystemLoader
+
+Urls = namedtuple('Urls', ['fqdn', 'git'])
 
 NGINX_CONFIG_PATH = '/etc/nginx/apps.d'
 GIT_PATH = '/opt/serve'
 APP_PATH = '/home/serve/apps'
 AUTHORIZED_KEYS = '/home/serve/.ssh/authorized_keys'
+try:
+    with open('/home/serve/.urls', 'r') as f:
+        urls = f.read().strip().split()
+        URLS = Urls(urls[0], "git://serve@{}:{}".format(urls[1], urls[2]))
+except IOError:
+    URLS = Urls('localhost:8080', 'git://serve@localhost:2222')
 
 
 env = Environment(loader=FileSystemLoader('/home/serve/serve/serve/templates'))
 
-def write_nginx_config(app_name):
+def write_nginx_config(app):
     """
     Write the NGINX config for the app.
     """
 
-    docker_port = subprocess.check_output(['docker', 'port', app_name]).strip()[-5:]
+    docker_port = subprocess.check_output(['docker', 'port', app]).strip()[-5:]
 
-    template = env.get_template('nginx_app.conf')
-    return template.render(app=app_name, docker_port=docker_port)
+    template = env.get_template('nginx_py.conf')
+    with open(os.path.join(NGINX_CONFIG_PATH, "{}.conf".format(app)), 'w') as f:
+        f.write(template.render(app=app, docker_port=docker_port))
 
-def configure_git_hooks(app_name, git_path):
+def configure_git_hooks(app, git_path):
     """
     Create the post-receive hook to build the docker image for the app.
     """
     template = env.get_template('post-receive')
-    return template.render(app=app_name, git_path=git_path)
+    return template.render(app=app, git_path=git_path)
 
 @click.group()
 def serve():
     pass
+
+@serve.command(name='set-url', help="Set the url and port of the server.")
+@click.argument('fqdn')
+@click.option('--port', default=22, help="The port to use for SSH.")
+def seturls(fqdn, port):
+    with open('/home/serve/.urls', 'w') as f:
+        f.write("{},{}".format(fqdn, port))
 
 @serve.group(help="Commands for user management.")
 def user():
@@ -96,7 +113,8 @@ def new(app):
         f.write(configure_git_hooks(app, app_git_path))
     subprocess.call(['chmod', '+x', os.path.join('hooks', 'post-receive')])
 
-    click.echo("Created {} app with remote url {}.".format(app, app_git_path))
+    click.echo("Created {} app with remote url {}{}".format(app, URLS.git,
+        app_git_path))
 
 @app.command(help="Delete a Serve app.")
 @click.argument('app')
@@ -112,10 +130,43 @@ def delete(app):
     subprocess.call(['docker', 'rm', app])
     subprocess.call(['docker', 'rmi', "{}-image".format(app)])
 
+@app.command(help="Start an app.")
+@click.argument('app')
+def start(app):
+    """
+    Start the container for the app.
+    """
+    click.echo("Starting the {} container...".format(app))
+    subprocess.call(['docker', 'start', app])
+
+    # Rewrite the nginx config to update the port
+    write_nginx_config(app)
+    subprocess.call(['sudo', '/etc/init.d/nginx', 'reload'])
+
+@app.command(help="Stop an app.")
+@click.argument('app')
+def stop(app):
+   """
+   Stop the container for the app."
+   """
+   click.echo("Stopping the {} container...".format(app))
+   subprocess.call(['docker', 'stop', app])
+
 @app.command(help="Display information about a running application.")
 @click.argument('app')
 def info(app):
     """
     Display information about a running application.
     """
-    click.echo("Info for {}.".format(app))
+    app_git_path = os.path.join(GIT_PATH, '{}.git'.format(app))
+    docker_port = subprocess.check_output(['docker', 'port', app]).strip()
+    running = app in subprocess.check_output(['docker', 'ps'])
+    if running:
+        click.echo("Info for {} [running]:".format(app))
+    else:
+        click.echo("Info for {} [stopped]:".format(app))
+
+    click.echo("Git URL: {}{}".format(URLS.git, app_git_path))
+    click.echo("URL: {}/{}".format(URLS.fqdn, app))
+    click.echo("Mapped Ports: {}".format(docker_port))
+

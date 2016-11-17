@@ -48,6 +48,11 @@ if [ -d '/home/serve/serve' ]; then
 fi
 
 # Copy the serve folder to the serve users's home directory and fix permissions
+if [ -d '/vagrant' ]; then
+    echo "In a vagrant vm, switching to shared directory..."
+    cd /vagrant
+fi
+
 echo "Copying the Serve app to the serve user's folder..."
 mkdir -p /home/serve/serve
 cp -r . /home/serve/serve
@@ -75,6 +80,10 @@ echo "serve ALL = NOPASSWD: /etc/init.d/nginx reload,/etc/init.d/nginx start, /e
 
 # Replace default nginx configuration
 cp serve_nginx_default.conf /etc/nginx/sites-available/default
+
+# Copy the bashrc script so the serve user has a reasonable bash prompt with completion
+cp .bashrc /home/serve/.bashrc
+chown serve:serve /home/serve/.bashrc
 
 echo "Finished installing Serve."
 echo "Restart the server to make sure the serve user has the correct permissions."

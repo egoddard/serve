@@ -20,9 +20,9 @@ service docker start
 useradd -m -G docker serve
 
 # Make folder to hold app nginx configs
-if [ ! -d '/etc/nginx/app.d' ]; then
-    mkdir /etc/nginx/app.d
-    chown serve:serve /etc/nginx/app.d
+if [ ! -d '/etc/nginx/apps.d' ]; then
+    mkdir /etc/nginx/apps.d
+    chown serve:serve /etc/nginx/apps.d
 fi
 
 # Make folder to hold app repos
@@ -80,6 +80,9 @@ echo "serve ALL = NOPASSWD: /etc/init.d/nginx reload,/etc/init.d/nginx start, /e
 
 # Replace default nginx configuration
 cp serve_nginx_default.conf /etc/nginx/sites-available/default
+
+# Create the local apps directory
+mkdir -p /home/serve/apps
 
 # Copy the bashrc script so the serve user has a reasonable bash prompt with completion
 cp .bashrc /home/serve/.bashrc

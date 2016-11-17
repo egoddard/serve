@@ -100,7 +100,7 @@ def list_apps():
 
 @app.command(help="Create a new app to Serve.")
 @click.argument('app')
-def new(app):
+def create(app):
     """
     Create a new app.
     """

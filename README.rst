@@ -69,9 +69,34 @@ With the ssh key added to the serve user, logout of the ssh session and create
 a new SSH session as the serve user. You'll have access to the serve commands.
 To see them, type :bash:`serve`. It will display the two commands available.
 Each of the commands has subcommands, and can be used by typing
-:bash:`serve <command>`.
+:bash:`serve <command>`.::
 
-|serve_cli|
+    serve@serve:~$ serve
+    Usage: serve [OPTIONS] COMMAND [ARGS]...
+
+    Options:
+      --help  Show this message and exit.
+
+    Commands:
+      app      Commands for app management.
+      set-url  Set the url and port of the server.
+      user     Commands for user management.
+    serve@serve:~$ serve app
+    Usage: serve app [OPTIONS] COMMAND [ARGS]...
+
+      Commands for app management.
+
+    Options:
+      --help  Show this message and exit.
+
+    Commands:
+      create  Create a new app to Serve.
+      delete  Delete a Serve app.
+      info    Display information about a running...
+      list    List all apps.
+      start   Start an app.
+      stop    Stop an app.
+
 
 Create a new app by typing :bash:`serve app create <appname>`. The git repository
 will be configured for the application and the remote url for the app will be

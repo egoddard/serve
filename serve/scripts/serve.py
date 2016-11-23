@@ -96,7 +96,8 @@ def list_apps():
     List all apps that have been created in Serve.
     """
     click.echo("All apps:")
-    click.echo("\n".join(os.listdir(APP_PATH)))
+    apps = [app[:-4] for app in os.listdir(GIT_PATH)]
+    click.echo("\n".join(apps))
 
 @app.command(help="Create a new app to Serve.")
 @click.argument('app')

@@ -124,12 +124,30 @@ def delete(app):
     Delete an app.
     """
     click.echo("Deleting the {} app.".format(app))
-    subprocess.call(['rm', '-rf', os.path.join(GIT_PATH, "{}.git".format(app))])
-    subprocess.call(['rm', '-rf', os.path.join(APP_PATH, app)])
-    subprocess.call(['rm', os.path.join(NGINX_CONFIG_PATH, "{}.conf".format(app))])
-    subprocess.call(['docker', 'stop', app])
-    subprocess.call(['docker', 'rm', app])
-    subprocess.call(['docker', 'rmi', "{}-image".format(app)])
+    try:
+        subprocess.call(['rm', '-rf', os.path.join(GIT_PATH, "{}.git".format(app))])
+    except subprocess.CalledProcessError:
+        click.echo("{} does not exist, skipping.".format(os.path.join(GIT_PATH, "{}.git".format(app))))
+    try:
+        subprocess.call(['rm', '-rf', os.path.join(APP_PATH, app)])
+    except subprocess.CalledProcessError:
+        click.echo("{} does not exist, skipping.".format(os.path.join(APP_PATH, app)))
+
+    try:
+        subprocess.call(['rm', os.path.join(NGINX_CONFIG_PATH, "{}.conf".format(app))])
+    except subprocess.CalledProcessError:
+        click.echo("{} does not exist, skipping.".format(os.path.join(NGINX_CONFIG_PATH, "{}.conf".format(app))))
+
+    try:
+        subprocess.call(['docker', 'stop', app])
+        subprocess.call(['docker', 'rm', app])
+    except subprocess.CalledProcessError:
+        click.echo("Docker app {} does not exist, skipping...".format(app))
+
+    try:
+        subprocess.call(['docker', 'rmi', "{}-image".format(app)])
+    except subprocess.CalledProcessError:
+        click.echo("Docker image {}-image does not exist, skipping...".format(app))
 
 @app.command(help="Start an app.")
 @click.argument('app')

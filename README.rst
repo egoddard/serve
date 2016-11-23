@@ -150,21 +150,25 @@ Pushing the test app to Serve
 
 After settings up Serve and adding your local ssh public key to the serve user's
 authorized_keys file with the :bash:`serve user add "<key>"`, create a project
-with :bash:`serve app new greenways`. If you do not name the project greenways,
-the project will still be accessible but some of the links will be broken.
+with :bash:`serve app new test-project`. The app for the test-project must be
+named test-project, as it is a Django app and the urls.py has been configured to
+make the app accessible at /test-project.
 
-On your local machine, :bash:`cd` into the test-project folder. It is a git 
-repo that already has a remote configured for use on the local vagrant machine.
-type :bash:`git push origin master` to push the project to the server. Open a 
-browser and type in http://localhost:8080/greenways as the URL and you should
-see the website.
-
+On your local machine, clone the test project into a new repository (outside of
+the serve directory) with
+:bash:`git clone https://github.com/egoddard/serve-test-project.git`.
+:bash:`cd` into the serve-test-project folder. In the serve-test-project folder,
+configure another remote by typing
+:bash:`git remote add serve ssh://serve@localhost:2222/opt/serve/test-project.git`.
+With the remote configured, type :bash:`git push serve master` to push the
+project to the server. Open a browser and type in
+http://localhost:8080/test-project as the URL and you should see the website.
 
 Conclusion
 ----------
 
 I chose to do this project because I use a tool called Dokku at work, which
-pretty much does almost everything I implemented and many things I didn't implement.
+does almost everything I implemented and many that I didn't.
 While I have created many Dockerfiles to serve my apps on Dokku, I have not
 had to actually use Docker or NGINX much since it was all handled by Dokku.
 Creating Serve gave me a better understanding of how Docker and NGINX work, and

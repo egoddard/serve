@@ -13,9 +13,9 @@ AUTHORIZED_KEYS = '/home/serve/.ssh/authorized_keys'
 try:
     with open('/home/serve/.urls', 'r') as f:
         urls = f.read().strip().split()
-        URLS = Urls(urls[0], "git://serve@{}:{}".format(urls[1], urls[2]))
+        URLS = Urls(urls[0], "ssh://serve@{}:{}".format(urls[1], urls[2]))
 except IOError:
-    URLS = Urls('localhost:8080', 'git://serve@localhost:2222')
+    URLS = Urls('localhost:8080', 'ssh://serve@localhost:2222')
 
 
 env = Environment(loader=FileSystemLoader('/home/serve/serve/serve/templates'))

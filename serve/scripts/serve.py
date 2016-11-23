@@ -178,14 +178,17 @@ def info(app):
     Display information about a running application.
     """
     app_git_path = os.path.join(GIT_PATH, '{}.git'.format(app))
-    docker_port = subprocess.check_output(['docker', 'port', app]).strip()
+    docker_port = None
+
     running = app in subprocess.check_output(['docker', 'ps'])
     if running:
         click.echo("Info for {} [running]:".format(app))
+        docker_port = subprocess.check_output(['docker', 'port', app]).strip()
     else:
         click.echo("Info for {} [stopped]:".format(app))
 
     click.echo("Git URL: {}{}".format(URLS.git, app_git_path))
     click.echo("URL: {}/{}".format(URLS.fqdn, app))
-    click.echo("Mapped Ports: {}".format(docker_port))
+    if docker_port:
+        click.echo("Mapped Ports: {}".format(docker_port))
 
